@@ -25,9 +25,9 @@ Merb.load_dependencies(:environment => init_env)
 Merb::Plugins.rakefiles.each { |r| require r } 
 
 # Load any app level custom rakefile extensions from lib/tasks
-tasks_path = File.join(File.dirname(__FILE__), "lib", "tasks")
-rake_files = Dir["#{tasks_path}/*.rake"]
-rake_files.each{|rake_file| load rake_file }
+#tasks_path = File.join(File.dirname(__FILE__), "lib", "tasks")
+#rake_files = Dir["#{tasks_path}/*.rake"]
+#rake_files.each{|rake_file| load rake_file }
 
 desc "Start runner environment"
 task :merb_env do

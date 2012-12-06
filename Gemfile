@@ -8,6 +8,8 @@ gem "merb-assets", '1.0.13'
 # gem("merb-cache", '1.1.13') do
 #   Merb::Cache.setup { register(Merb::Cache::FileStore) }
 # end
+gem 'ZenTest', '~> 4.3'
+
 gem "merb-helpers", '1.0.13'
 gem "merb-mailer", '1.0.13'
 gem "merb-haml", '1.0.13'

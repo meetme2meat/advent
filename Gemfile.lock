@@ -156,6 +156,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  ZenTest (~> 4.3)
   builder
   data_objects (= 0.10.0)
   dm-aggregates (= 0.10.1)

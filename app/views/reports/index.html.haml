@@ -1,0 +1,21 @@
+%h1
+  Reports
+/= link_to 'New Report','', :class => "add"
+%table.narrow.form{:width => "100%"}
+  %thead
+    %tr
+      %th
+        Please choose a Report Type
+  %tr
+    %td
+      %h3
+        =link_to("Weekly Reports", url(:show_report, :report_type => "WeeklyReport"))
+  -Reports::Types.each do |report|
+    %tr
+      %td
+        %h3
+          =link_to(report.name, url(:show_report, :report_type => report))
+  %tr
+    %td
+      %h3
+        =link_to("Custom reports", resource(:bookmarks, :type => "custom_reports"))      

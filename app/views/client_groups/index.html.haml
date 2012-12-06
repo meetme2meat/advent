@@ -1,0 +1,20 @@
+%h1
+  Groups
+%table{:width => "60%"}
+  %tr
+    %th
+      Group
+    %th
+      Center
+    %th
+      
+  %tr
+  - for client_group in @client_groups
+    %tr
+      %td
+        = client_group.name
+      %td
+        = client_group.center.name
+      %td
+        = link_to('Edit', url(:controller => params[:controller], :action => :edit, :id => client_group))
+

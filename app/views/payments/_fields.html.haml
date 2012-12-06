@@ -1,0 +1,32 @@
+%table.form
+  %tr
+    %td
+      Amount
+    %td
+      = text_field :amount
+  %tr
+    %td
+      Type
+    %td
+      = select :type, :collection => [:total] + Payment.types, :text_method => :to_s, :value_method => :to_s
+  %tr
+    %td
+      Repayment Style
+    %td
+      = select :name => :style, :collection => [["normal","int. then prin."],["prorata","pro rata"]]
+      %span.small
+        only applies to "total" repayment type
+  %tr
+    %td Received:
+    %td
+      on&nbsp;&nbsp;
+      = date_select_for @payment, :received_on
+      &nbsp;&nbsp;by&nbsp;&nbsp;
+      = select :received_by_staff_id, :collection => StaffMember.all(:active => true), :value_method => :id, :text_method => :name, :prompt => "&lt;select a staff member&gt;"
+  %tr
+    %td
+    %td
+      = submit submit_text
+      &nbsp;&nbsp;
+      = link_to 'cancel', cancel_link
+

@@ -1,0 +1,29 @@
+%h1 Add a new loan
+
+= error_messages_for @loan
+
+- if @loan.nil?
+  %p== Please select the type of loan product you want to create for #{@client.name}.
+  .prefix-2.span-16.suffix-6.last
+  %table
+    - @loan_products.each do |product|
+      = form_for(@loan, :action => resource(@branch, @center, @client, :loans, :new), :method => 'get') do
+        %tr
+          %td
+            %h3
+              = product.name
+              = hidden_field :name => "product_id", :value => product.id
+          %td
+            = product.to_s
+          %td
+            = submit "Proceed"
+  -if @loan_products.length==0
+    %div.error
+      =link_to("There are no loan products available. Create one now", resource(:loan_products, :new)) 
+  = link_to 'cancel', resource(@branch, @center, @client, :loans)
+- else
+  = form_for(@loan, :action => resource(@branch, @center, @client, :loans), :onsubmit => "javascript: return confirm_for(o);") do
+    - if @loan.fields_partial.blank?
+      = partial :fields, :submit_text => "Create loan for #{@client.name}", :cancel_link => resource(@branch, @center, @client, :loans)
+    - else
+      = @loan.fields_partial

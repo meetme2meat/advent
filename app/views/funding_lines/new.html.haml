@@ -1,0 +1,7 @@
+%h1 Create a new funding line
+
+= error_messages_for @funding_line
+
+= form_for(@funding_line, :action => resource(@funder, :funding_lines)) do
+  = partial :fields
+  = submit "Create funding line"      

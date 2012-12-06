@@ -1,0 +1,28 @@
+%h1 
+  == Clients for #{@client_group.name}
+  = link_to("[Edit]", resource(@client_group, :edit), :class => "edit")
+%h2 Clients
+%table.narrow
+  %tr
+    %thead
+      %th
+        id
+      %th
+        Name
+  - @client_group.clients.each do |client|
+    %tr{:class => cycle('odd','even')}
+      %td
+        = client.id
+      %td
+        = link_to client.name, resource(client)
+  
+  
+%h1 CGTs
+= link_to 'Manage CGTs', resource(@client_group, :cgts), :class => 'edit'
+= partial 'cgts/cgts'
+
+%h1 GRTs
+= link_to 'Manage GRTs', resource(@client_group, :grts), :class => 'edit'
+= partial 'grts/grts'
+
+

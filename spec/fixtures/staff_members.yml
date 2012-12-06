@@ -1,0 +1,19 @@
+a:
+  :id: 1
+  :name: Fatima
+  :active: true
+
+b:
+  :id: 2
+  :name: Feroza
+  :active: true
+
+c: 
+  :id: 3
+  :name: Madhuri
+  :active: true
+
+d: 
+  :id: 4
+  :name: Usha
+  :active: true

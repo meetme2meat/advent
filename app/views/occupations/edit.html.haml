@@ -1,0 +1,11 @@
+%h1
+  Edit Occupation
+
+= link_to 'Back', url(:occupations)
+= error_messages_for @occupation
+
+= form_for(@occupation, :action => url(:occupation, @occupation)) do
+  = partial :fields
+  = submit "Update"
+
+= link_to 'Show', url(:occupation, @occupation)

@@ -1,0 +1,119 @@
+=partial :form
+%table.report
+  %tr.header
+    %th{:width => '20%'}
+      Date
+    %th{:width => '20%'}
+      Client
+    %th
+      Disbursed
+    %th{:colspan => "4"}
+      Payment
+  %tr.header
+    %th
+    %th
+    %th
+    %th
+      Principal
+    %th
+      Interest
+    %th
+      Fee
+    %th
+      Total
+  - center_id, branch_id = nil, nil
+  - length = 7
+  - groups_available = @payments.values.collect{|x| x.keys}.flatten.uniq
+  - org_total = []
+  -@clients.each do |branch_id, centers|
+    -if centers.keys.length>0
+      -branch_total = []
+      %tr.branch
+        %td{:colspan => length}
+          %b
+            =@branches[branch_id].name
+      -centers.sort_by{|center_id, groups| @centers[center_id].name}.each do |center_id, groups|
+        -if groups.keys.length>0 and (groups.keys & groups_available).length>0
+          %tr.center
+            %td{:colspan => length}
+              %b
+                =@centers[center_id].name
+          - center_total = Array.new(length-2, 0)
+          -groups.sort_by{|x| @groups[x[0]].name}.each do |group_id, clients|
+            -if groups_available.include?(group_id)
+              -group_total = Array.new(length-2, 0)
+              %tr.group
+                %td{:colspan => length}
+                  %b=@groups[group_id].name
+              -@payments.keys.sort.each do |date|
+                -date_total = Array.new(length-2, 0)
+                -if @payments[date] and @payments[date][group_id] and @payments[date][group_id].keys.length>0
+                  -@payments[date][group_id].keys.sort_by{|x| clients.find{|c| c.id==x}.name}.each do |client_id|
+                    -itr=@payments[date][group_id][client_id].collect{|x| x.length}.max
+                    -itr.times do |i|
+                      %tr.date
+                        %td.align_left
+                          = date
+                        %td.align_left
+                          =clients.find{|x| x.id==client_id}.name
+                        -sum=0
+                        -@payments[date][group_id][client_id].each_with_index do |e, col|
+                          %td
+                            -if e[i]
+                              =e[i]
+                              -e_val = e[i]
+                              -sum += e_val if col>0
+                              -center_total[col]+= e_val
+                              -group_total[col] += e_val
+                              -date_total[col]  += e_val
+                            -else
+                              0
+                        %td
+                          =sum
+                          -center_total[-1]+= sum
+                          -group_total[-1] += sum
+                          -date_total[-1]  += sum
+                  %tr.date_total
+                    %td
+                      %b
+                        Date total
+                    %td
+                    -date_total.each do |ele|
+                      %td
+                        %b=ele
+              %tr.group_total
+                %td
+                  %b==Group total
+                %td
+                -group_total.each do |ele|
+                  %td
+                    %b
+                      =ele
+          %tr.center_total
+            %td
+              %b==Center total:
+              -branch_total.push(center_total)
+            %td
+            -center_total.each do |ele|
+              %td
+                %b
+                  =ele
+      - branch_sum_arr = branch_total.transpose.collect{|arr| arr.reduce{|s, x| s+=x}}
+      - if branch_sum_arr.reduce{|x, sum| sum+=x}
+        %tr.branch_total
+          %td
+            %b==Branch total:
+          - org_total << branch_total.transpose.collect{|arr| arr.reduce{|s, x| s+=x}}
+          %td
+          -org_total.last.each do |ele|
+            %td
+              %b
+                =ele
+  %tr.org_total
+    %td
+      %b==Total:
+    %td
+    -org_total.transpose.collect{|arr| arr.reduce{|s, x| s+=x}}.each do |ele|
+      %td
+        %b
+          =ele

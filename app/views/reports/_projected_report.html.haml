@@ -1,0 +1,82 @@
+=partial :form
+%table.report
+  %tr.header
+    %th
+      Group
+    %th{:colspan => "2"}
+      Disbursal scheduled
+    %th{:colspan => "4"}
+      Payment scheduled
+    %th{:colspan => "4"}
+      Balance outstanding
+  %tr.header
+    %th
+    %th
+      Applied
+    %th
+      Sanctioned
+    %th
+      Principal
+    %th
+      Interest
+    %th
+      Fee
+    %th
+      Total
+    %th
+      Principal
+    %th
+      Interest
+    %th
+      Fee
+    %th
+      Total
+  - center_id, branch_id = nil, nil
+  - length = 10
+  - org_total = []
+  -@data.sort_by{|branch, centers| branch.name}.each do |branch, centers|
+    -if centers.keys.length>0
+      -branch_total = []
+      %tr.branch
+        %td{:colspan => length+1}
+          %b
+            =branch.name
+      -centers.sort_by{|center, groups| center.name}.each do |center, groups|
+        -if groups.keys.length>0
+          %tr.center
+            %td{:colspan => length+1}
+              %b
+                =center.name
+          - center_total = Array.new(length, 0)
+          -groups.sort_by{|group, data| group.name}.each do |group, data|
+            %tr.group
+              %td
+                =group.name
+              -data.each_with_index do |d, idx|
+                %td
+                  = d
+                  - center_total[idx]+=d
+          %tr.center_total
+            %td
+              %b==Center total:
+              -branch_total.push(center_total)
+            -center_total.each do |ele|
+              %td
+                %b
+                  =ele
+      %tr.branch_total
+        %td
+          %b==Branch total:
+        - org_total << branch_total.transpose.collect{|arr| arr.reduce{|s, x| s+=x}}
+        -org_total.last.each do |ele|
+          %td
+            %b
+              =ele
+  %tr.org_total
+    %td
+      %b==Total:
+    -org_total.find_all{|x| x.length==length}.transpose.collect{|arr| arr.reduce{|s, x| s+=x}}.each do |ele|
+      %td
+        %b
+          =ele
+

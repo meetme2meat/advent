@@ -1,0 +1,36 @@
+%table.form
+  %tr
+    %th
+      Name
+      %td
+        = text_field :name
+  %tr
+    %th
+      Region
+    %td
+      - if @region
+        = hidden_field :region_id, :value => @region.id
+        %b
+        = @region.name
+      - else
+        = select :region_id, :collection =>  Region.all.map{|r| [r.id, r.name]}, :prompt => "---", :selected => @area.region ? @area.region.id.to_s : nil
+  %tr
+    %th
+      Manager
+    %td
+      = select :manager_id, :collection =>  StaffMember.all.map{|r| [r.id, r.name]}, :prompt => "---", :selected => @area.manager ? @area.manager.id.to_s : nil
+  %tr
+    %th
+      Address:
+    %td
+      ~ text_area :address, :rows => 6, :cols => 38
+  %tr
+    %th
+      Contact phone number:
+    %td
+      = text_field :contact_number, :size => 15
+  %tr
+    %th
+      Landmark:
+    %td
+      = text_field :landmark, :size => 25

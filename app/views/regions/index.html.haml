@@ -1,0 +1,26 @@
+%h1
+  Regions
+
+%table.narrow.form{:width=>"100%"}
+  %thead
+    %tr
+      %th
+        id
+      %th
+        name
+      %th
+        areas
+      %th
+        edit
+  - for region in @regions
+    %tr{:class => cycle('odd','even')}
+      %td
+        = region.id
+      %td 
+        = link_to region.name, resource(region)
+      %td
+        = region.areas.count
+      %td
+        = link_to 'Edit', url(:edit_region,  region)
+
+= link_to 'New', url(:new_region)

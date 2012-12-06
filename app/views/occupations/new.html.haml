@@ -1,0 +1,9 @@
+%h1 New Occupation
+
+= error_messages_for @occupation
+
+= form_for(@occupation, :action => url(:occupations) ) do
+  = partial :fields
+  = submit "Create"
+
+= link_to 'Back', url(:occupations)

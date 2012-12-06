@@ -1,0 +1,40 @@
+%table{:width => "100%"}
+  %tr    
+    %th
+      Type
+    %th
+      Number
+    %th
+      Date of issue
+    %th
+      Valid upto
+    %th
+      Issued by
+    %th
+      Description
+    %th
+      Preview
+  - for document in @documents
+    %tr
+      %td
+        = document.document_type.name
+      %td
+        = document.number
+      %td
+        = document.date_of_issue
+      %td
+        = document.valid_upto
+      %td
+        = document.issuing_authority
+      %td
+        = document.description
+      %td
+        -if /^image\//.match(document.document_content_type)
+          =image_tag(document.document.url, :height => 50)
+        -else
+          Not available
+      %td
+        = link_to 'download', document.document.url, :target => "BLANK"
+      %td
+        = link_to_with_rights('Edit', url(:action => :edit, :id => document, :parent_id => @parent.id, :parent_model => @parent.class), :class => (request.xhr? ? "_remote_" : ""))
+=link_to("New", resource(:documents, :new, {:parent_id => @parent.id, :parent_model => @parent.class}), :class => (request.xhr? ? "_remote_ add" : "add"))

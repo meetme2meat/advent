@@ -1,0 +1,73 @@
+=partial :form
+- length = 10
+%table.report
+  %tr.header
+    %th
+    %th
+      Client
+    %th
+      Reference
+    %th
+      Loan seq.
+    %th
+      Product
+    %th
+      Amount
+    %th
+      Frequency
+    %th
+      Principal due
+    %th
+      Interest due
+    %th
+      Total due
+    %th
+      Days late
+  - summable_columns = [4,6,7,8]
+  - org_total = Array.new(summable_columns.length, 0)
+  - @data.each do |branch, centers|
+    -branch_total = Array.new(summable_columns.length, 0)
+    %tr.branch
+      %td{:colspan => length+1}
+        = branch.name
+    - centers.each do |center, loans|
+      -center_total = []
+      %tr.center
+        %td{:colspan => length+1}
+          = center.name
+      - loans.each do |l|
+        -center_total << summable_columns.collect{|x| l[x]}
+        %tr.group
+          %td
+          -l.each_with_index do |e, i|
+            %td
+              = e
+      - center_total = center_total.transpose.collect{|x| x.inject(0){|sum, x| sum+=x}}
+      %tr.center_total
+        %td
+          Center total
+        -0.upto(length-1).each do |col|
+          %td
+            -if summable_columns.include?(col)
+              %b
+                =center_total[summable_columns.index(col)]
+        -branch_total.push(center_total) if center_total.class==Array
+    -branch_total=branch_total.reject{|x| x.class!=Array or x.length!=summable_columns.length}.transpose.collect{|x| x.inject(0){|sum, x| sum+=x}}
+    %tr.branch_total
+      %td
+        Branch total
+        -0.upto(length-1).each do |col|
+          %td
+            -if summable_columns.include?(col)
+              %b
+                =branch_total[summable_columns.index(col)]
+        - org_total.push(branch_total)
+  %tr.org_total
+    %td
+      Total
+    -org_total = org_total.reject{|x| x.class!=Array or x.length!=summable_columns.length}.transpose.collect{|x| x.inject(0){|sum, x| sum+=x}}
+    -0.upto(length-1).each do |col|
+      %td
+        -if summable_columns.include?(col)
+          %b
+            =org_total[summable_columns.index(col)]

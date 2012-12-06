@@ -1,0 +1,6 @@
+%h1== Edit the '#{@funder.name}' funder details
+
+= error_messages_for @funder
+
+= form_for(@funder, :action => url(:funder, @funder)) do
+  = partial :fields, :submit_text => "Save changes"

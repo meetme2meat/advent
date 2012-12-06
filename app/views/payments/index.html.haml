@@ -1,0 +1,203 @@
+- if @loan and @loan.disbursal_date
+  .graph
+    = ofc2(430, 250, 'http://' + (request.env['HTTP_HOST'] or 'example.org') + url(:graph_data, :action => 'loan', :id => @loan.id, :scope_unit => 'months', :scope_size => 3) )
+
+= error_messages_for @payment
+%h1
+  Loan
+  = link_to "##{@loan.id}", url_for_loan(@loan)
+  by client
+  = link_to "<i>#{@client.name}</i>", resource(@branch, @center, @client)
+
+%table.narrow.form{ :style => 'width : 50%' }
+  %tr.odd
+    %td{ :width => '30%' } amount disbursed
+    %td
+      -if @loan.disbursal_date
+        == <b>#{@loan.amount}</b> @
+        %b= format("%.2f%", @loan.interest_rate*100)
+      -else
+        Not disbursed yet
+  %tr
+    %td{ :width => '30%' } amount sanctioned
+    %td
+      -if @loan.approved_on
+        == <b>#{@loan.amount_sanctioned}</b> @
+        %b= format("%.2f%", @loan.interest_rate*100)
+      -else
+        Not approved yet
+  %tr
+    %td{ :width => '30%' } amount applied
+    %td
+      == <b>#{@loan.amount_applied_for}</b> @
+      %b= format("%.2f%", @loan.interest_rate*100)
+  %tr
+    %td type
+    %td= @loan.discriminator
+  %tr.odd
+    %td installments
+    %td
+      = @loan.number_of_installments
+      = @loan.installment_frequency
+      == (#{@loan.number_of_installments_before(Date.today)} past installments)
+  %tr
+    %td application
+    %td
+      on
+      = @loan.applied_on
+      by
+      %b= link_to @loan.applied_by.name, resource(@loan.applied_by)
+  %tr.odd
+    %td approval
+    %td
+      - if @loan.approved_on
+        on
+        = @loan.approved_on
+        by
+        %b= link_to @loan.approved_by.name, resource(@loan.approved_by)
+      - else
+        %i approval is pending
+  %tr
+    %td disbursed
+    %td
+      - if @loan.disbursal_date
+        on
+        = @loan.disbursal_date
+        by
+        %b= link_to @loan.disbursed_by.name, resource(@loan.disbursed_by)
+      - else
+        to be disbursed on
+        = @loan.scheduled_disbursal_date
+      - if @loan.class.to_s.match(/^TakeOver/)
+        %br
+        %i 
+          original loan disbursed on
+          = @loan.original_disbursal_date
+  %tr.odd
+    %td first payment
+    %td
+      - if @loan.payments.empty?
+        = @loan.scheduled_first_payment_date
+        %br/
+        %span.greytext (scheduled, no payments yet)
+      - else
+        = actual_first_payment = @loan.payments.first(:order => [:received_on]).received_on
+        %br/
+        %span.greytext
+          - if actual_first_payment == @loan.scheduled_first_payment_date
+            as scheduled
+          - else
+            = difference_in_days(@loan.scheduled_first_payment_date, actual_first_payment, ['days earlier', 'days later'])
+            then scheduled
+            == (#{@loan.scheduled_disbursal_date})
+      - if @loan.class.to_s.match(/^TakeOver/)
+        %br
+        %i 
+          original first payment date
+          = @loan.original_first_payment_date
+
+  %tr
+    %td
+      fees applicable
+    %td
+      - @loan.loan_product.fees.each do |f|
+        = f.description
+  %tr
+    %td
+      fees paid
+    %td
+      == #{@loan.total_fees_paid} / #{@loan.total_fees_due}
+      - if @loan.fees_paid?
+        %span.green Paid
+
+
+  %tr
+    %td status
+    %td
+      %b= @loan.status.to_s.gsub('_', ' ')
+      - if @loan.status == :written_off
+        by
+        %b= link_to @loan.written_off_by.name, resource(@loan.written_off_by)
+
+= link_to 'edit this loan >>', url_for_loan(@loan, 'edit'), :class => "button"
+
+%div.tab_container
+  %ul.tabs
+    %li#payment_schedule Payment Schedule
+    %li#payments_made Payments made
+    %li#audit Audits
+    %li#misc Miscellaneous
+    %li#history History
+
+  %div.tab
+    %h2== Payment schedule
+    %table.narrow.form{ :width => '100%' }
+      %thead
+        %tr
+          %th
+          %th date due
+          %th scheduled balance
+          %th scheduled payment
+          %th actual balance
+          %th actual payments
+          %th difference
+      %tbody
+      - first, passed = true, false  # these are for printing the "today" row
+      - last_payment = @loan.payments.first(:order => [:received_on.desc])
+      - last_payment_date = last_payment.received_on if last_payment
+      - principal_so_far = interest_so_far = principal_received_so_far = interest_received_so_far = 0
+      - @history = @loan.calculate_history
+      - @history.each_with_index do |h,i|
+        - principal_so_far += h[:principal_due]
+        - interest_so_far += h[:interest_due]
+        - principal_received_so_far += h[:principal_paid]
+        - interest_received_so_far += h[:interest_paid]
+        - scheduled_principal = i > 0 ? @history[i-1][:scheduled_outstanding_principal] - h[:scheduled_outstanding_principal] : 0
+        - scheduled_interest = i > 0 ? @history[i-1][:scheduled_outstanding_total] - h[:scheduled_outstanding_total] - scheduled_principal : 0
+        - if h[:date] > Date.today and not passed
+          - passed = true
+          - if not first
+            %tr{ :class => cycle('odd','') }
+              %td{ :colspan => 6, :style => "text-align: center;" }
+                %span.greytext== today (#{Date.today})
+        - first = false
+        %tr{ :class => cycle('odd','') }
+          %td &nbsp;
+          %td
+            = h[:date]
+          %td
+            %b= format_currency h[:scheduled_outstanding_principal]
+          %td
+            %b= format_currency(scheduled_principal + scheduled_interest)
+            %br/
+            %span.greytext== #{scheduled_principal.round(2)} principal + #{scheduled_interest.round(2)} interest
+          %td
+            - if last_payment_date and (h[:date] <= last_payment_date or h[:date] <= Date.today)
+              %b= format_currency h[:actual_outstanding_principal]
+          %td
+            - if last_payment_date and (h[:date] <= last_payment_date or h[:date] <= Date.today)
+              %b= format_currency h[:principal_paid] + h[:interest_paid]
+              %br/
+              %span.greytext
+                == #{format_currency h[:principal_paid]} principal + #{format_currency h[:interest_paid]} interest
+          %td
+            - if h[:date] <= Date.today
+              %b
+                %span{ :class => (h[:amount_in_default] > 0 ? 'red' : 'green') }
+                  = h[:amount_in_default].round
+              %br/
+              %span.greytext
+                %span{ :class => (h[:amount_in_default] > 0 ? 'red' : 'green') }
+                  = format("%.0f%", (h[:amount_in_default].abs.to_f / @loan.total_to_be_received) * 100)
+                = h[:amount_in_default] <= 0 ? 'overpaid' : 'shortfall'
+      %tfoot
+        %tr
+          %td{ :colspan => 7 }
+  %div.tab
+    =partial "payments/list"
+  %div.tab 
+    %input{:type => "hidden", :name => "_load_remote", :value => resource(:audit_items, :model => "Loan", :id => @loan.id)}
+  %div.tab
+    %input{:type => "hidden", :name => "_load_remote", :value => url(:controller => :loans, :action => "misc", :id => @loan.id)}
+  %div.tab 
+    %input{:type => "hidden", :name => "_load_remote", :value => audit_trail_url}

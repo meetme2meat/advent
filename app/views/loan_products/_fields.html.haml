@@ -1,0 +1,42 @@
+%table
+  - [:name, :min_amount, :max_amount, :amount_multiple, :min_interest_rate, :max_interest_rate, :interest_rate_multiple, :min_number_of_installments, :max_number_of_installments].each do |attr|
+    %tr
+      %th
+        = attr.humanize
+        %td
+          = text_field attr
+  %tr
+    %th
+      Installment Frequency
+    %td
+      = select :installment_frequency, :collection => [[:any, "Any"]] + Loan.installment_frequencies.map {|f| [f,f.to_s]}
+  %tr
+    %th
+      Loan Type
+    %td
+      = select :loan_type, :collection => Loan.descendants.map{|f| [f, f.to_s]}
+  %tr
+    %th
+      Valid from
+    %td
+      = date_select_for @loan_product, :valid_from
+  %tr
+    %th
+      Valid upto
+    %td
+      = date_select_for @loan_product, :valid_upto
+  
+%h2 Fees
+- Fee.all.each do |fee|
+  = check_box :name => "fees[#{fee.id}]", :checked => @loan_product.fees.include?(fee)
+  = fee.name
+%h2 Payment Validations
+- Misfit::PaymentValidators.instance_methods.each do |v|
+  = check_box :name => "payment_validations[#{v}]", :checked => @loan_product.payment_validations.include?(v.to_sym)
+  = v.humanize
+%h2 Loan Validations
+- Misfit::LoanValidators.instance_methods.each do |v|
+  = check_box :name => "loan_validations[#{v}]", :checked => @loan_product.loan_validations.include?(v.to_sym)
+  = v.humanize
+
+%br

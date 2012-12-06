@@ -1,0 +1,35 @@
+%table.form
+  %tr
+    %td
+      Name:
+    %td
+      = text_field :name, :size => 40
+      %br/
+      %span.greytext the screen name of the staff member
+  %tr
+    %td
+      Mobile number:
+    %td
+      = text_field :mobile_number, :size => 40
+      %br/
+      %span.greytext mobile number of the staff member so that he/she can make mobile updates from this number
+  %tr
+    %td
+      Joining date:
+    %td
+      = date_select_for @staff_member, :creation_date
+      &nbsp;&nbsp;
+      %span.greytext date this staff member joined active duty
+  %tr
+    %td
+      Active:
+    %td
+      = check_box :active
+      &nbsp;&nbsp;
+      %span.greytext only active staff members can be marked as managers, approve loans, or receive payments
+  %tr
+    %td
+    %td
+      = submit submit_text
+      &nbsp;&nbsp;
+      = link_to 'cancel', url(:staff_members)
